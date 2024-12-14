@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Викторина о доменных печах</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #2e2e2e;
+      color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .container {
+      text-align: center;
+      max-width: 600px;
+    }
+    .question {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+    .answers {
+      display: flex;
+      flex-direction: column;
+    }
+    .answer {
+      background-color: #444;
+      border: none;
+      color: white;
+      padding: 10px;
+      margin: 5px 0;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+    }
+    .answer:hover {
+      background-color: #666;
+    }
+    .hidden {
+      display: none;
+    }
+    .explanation {
+      margin-top: 20px;
+      font-size: 1rem;
+      color: #a4c639;
+    }
+    .leaderboard {
+      margin-top: 30px;
+    }
+    .leaderboard-item {
+      margin: 5px 0;
+    }
+    .correct {
+      background-color: #4caf50 !important;
+    }
+    .wrong {
+      background-color: #f44336 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Викторина о доменных печах</h1>
+    <div id="question-container">
+      <div id="question" class="question">Загрузка...</div>
+      <div id="answers" class="answers"></div>
+      <div id="explanation" class="explanation hidden"></div>
+    </div>
+    <div id="leaderboard" class="leaderboard hidden">
+      <h2>Таблица лидеров</h2>
+      <div id="leaderboard-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "Для чего нужен известняк в доменной печи?",
+        answers: [
+          { text: "Для удаления примесей", correct: true },
+          { text: "Для нагревания руды", correct: false },
+          { text: "Для охлаждения", correct: false },
+          { text: "Для транспортировки", correct: false }
+        ],
+        explanation: "Известняк помогает удалить примеси, такие как сера и кремний, из руды."
+      },
+      {
+        question: "Какая температура достигается в доменной печи?",
+        answers: [
+          { text: "500°C", correct: false },
+          { text: "1200°C", correct: false },
+          { text: "2000°C", correct: true },
+          { text: "3000°C", correct: false }
+        ],
+        explanation: "Температура в доменной печи достигает около 2000°C, что позволяет плавить железо."
+      },
+      {
+        question: "Какая основная продукция получается в доменной печи?",
+        answers: [
+          { text: "Чугун", correct: true },
+          { text: "Сталь", correct: false },
+          { text: "Медь", correct: false },
+          { text: "Алюминий", correct: false }
+        ],
+        explanation: "Основной продукцией доменной печи является чугун, который затем перерабатывается в сталь."
+      },
+      {
+        question: "Что используется в качестве топлива в доменной печи?",
+        answers: [
+          { text: "Каменный уголь", correct: false },
+          { text: "Кокс", correct: true },
+          { text: "Газ", correct: false },
+          { text: "Древесина", correct: false }
+        ],
+        explanation: "В доменной печи используется кокс, так как он обеспечивает высокую температуру и необходимые химические реакции."
+      },
+      {
+        question: "Какую функцию выполняет горячий воздух, подаваемый в доменную печь?",
+        answers: [
+          { text: "Охлаждает печь", correct: false },
+          { text: "Сжигает кокс", correct: true },
+          { text: "Удаляет примеси", correct: false },
+          { text: "Увлажняет руду", correct: false }
+        ],
+        explanation: "Горячий воздух помогает сжигать кокс, создавая необходимую для плавления руды температуру."
+      }
+    ];
+
+    const correctSound = new Audio("correct.mp3");
+    const wrongSound = new Audio("wrong.mp3");
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const questionElement = document.getElementById("question");
+    const answersElement = document.getElementById("answers");
+    const explanationElement = document.getElementById("explanation");
+    const leaderboardElement = document.getElementById("leaderboard");
+    const leaderboardList = document.getElementById("leaderboard-list");
+
+    function startQuiz() {
+      showQuestion(questions[currentQuestionIndex]);
+    }
+
+    function showQuestion(question) {
+      questionElement.textContent = question.question;
+      answersElement.innerHTML = "";
+      explanationElement.classList.add("hidden");
+
+      question.answers.forEach(answer => {
+        const button = document.createElement("button");
+        button.textContent = answer.text;
+        button.classList.add("answer");
+        button.dataset.correct = answer.correct;
+        button.addEventListener("click", selectAnswer);
+        answersElement.appendChild(button);
+      });
+    }
+
+    function selectAnswer(e) {
+      const selectedButton = e.target;
+      const correct = selectedButton.dataset.correct === "true";
+
+      Array.from(answersElement.children).forEach(button => {
+        button.classList.add(button.dataset.correct === "true" ? "correct" : "wrong");
+      });
+
+      if (correct) {
+        score++;
+        correctSound.play();
+      } else {
+        wrongSound.play();
+      }
+
+      explanationElement.textContent = questions[currentQuestionIndex].explanation;
+      explanationElement.classList.remove("hidden");
+
+      setTimeout(() => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+          showQuestion(questions[currentQuestionIndex]);
+        } else {
+          showLeaderboard();
+        }
+      }, 2000);
+    }
+
+    function showLeaderboard() {
+      questionElement.classList.add("hidden");
+      answersElement.classList.add("hidden");
+      explanationElement.classList.add("hidden");
+      leaderboardElement.classList.remove("hidden");
+
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      leaderboard.push({ name: "Игрок", score });
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+
+      leaderboardList.innerHTML = leaderboard
+        .sort((a, b) => b.score - a.score)
+        .map(entry => `<div class="leaderboard-item">${entry.name}: ${entry.score}</div>`)
+        .join("");
+    }
+
+    startQuiz();
+  </script>
+</body>
+</html>
